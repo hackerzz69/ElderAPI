@@ -16,7 +16,7 @@ class PmAllCommand : Command {
     private val logger = KotlinLogging.logger {}
 
     override fun canExecute(message: Message): Boolean {
-        val role = message.jda.getRoleById(Role.ADMINISTRATOR.discordRoleId)
+        val role = message.jda.getRoleById(Role.OWNER.discordRoleId)
         return role != null && message.guild.getMembersWithRoles(role).contains(message.member)
     }
 

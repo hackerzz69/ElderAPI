@@ -43,7 +43,7 @@ object TicketManager {
                             .deny(Permission.VIEW_CHANNEL)
                             .queue()
                     }
-                    Role.ADMINISTRATOR.asJDARole()?.let {
+                    Role.STAFF.asJDARole()?.let {
                         channel.upsertPermissionOverride(it)
                             .grant(Permission.VIEW_CHANNEL)
                             .queue()
