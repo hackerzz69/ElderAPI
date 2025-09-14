@@ -24,7 +24,7 @@ class AntiknoxCheckQuery(private val ip: String): SQLRunnable() {
 
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(CHECK_QUERY).use { stmt ->
                     stmt.setString(1, ip)
                     stmt.execute()

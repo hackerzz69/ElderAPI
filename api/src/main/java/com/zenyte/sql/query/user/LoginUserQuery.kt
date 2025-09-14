@@ -19,7 +19,7 @@ class LoginUserQuery(val request: LoginRequest) : SQLRunnable() {
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_forum").use { con ->
+            HikariPool.getConnection(auth, "elder_forum").use { con ->
                 con.prepareStatement(query).use { stmt ->
                     val decryptedPassword = AES.decrypt(request.password, "p8UfL9dgr2R2x5n5")
 

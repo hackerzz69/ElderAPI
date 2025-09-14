@@ -32,7 +32,7 @@ class IpVerificationQuery(private val ip: String) : SQLRunnable() {
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(COMPARE_IP).use { pst ->
                     pst.setString(1, ip)
                     pst.execute()

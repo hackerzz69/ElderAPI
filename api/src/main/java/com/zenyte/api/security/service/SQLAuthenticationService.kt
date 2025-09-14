@@ -13,21 +13,32 @@ import java.util.*
  */
 @Service
 class SQLAuthenticationService {
-    
+
     private val cache = hashMapOf<String, Boolean>()
-    
+
     fun findByToken(token: String, ip: String): Optional<ApiUser> {
-        return Optional.ofNullable(if (checkToken(token, ip)) ApiUserBuilder().token(token).build() else null)
-    }
-    
-    private fun checkToken(token: String, ip: String): Boolean {
-        when (cache.contains(token)) {
-            true -> return cache.get(token) ?: false
-            false -> {
-                val success = (ApiAuthenticationQuery(token, ip).getResults().first as ApiAuthenticationResult).successful
-                cache.put(token, success)
-                return success
-            }
+        println("🔎 [SQLAuthService] findByToken called with token='$token' ip='$ip'")
+        val result = if (checkToken(token, ip)) {
+            println("✅ [SQLAuthService] Token '$token' is valid")
+            ApiUserBuilder().token(token).build()
+        } else {
+            println("❌ [SQLAuthService] Token '$token' is invalid")
+            null
         }
+        return Optional.ofNullable(result)
+    }
+
+    private fun checkToken(token: String, ip: String): Boolean {
+        if (cache.containsKey(token)) {
+            val cached = cache[token] ?: false
+            println("💾 [SQLAuthService] Cache hit for token='$token' -> $cached")
+            return cached
+        }
+
+        println("🗄️ [SQLAuthService] Cache miss for token='$token'. Querying database…")
+        val result = (ApiAuthenticationQuery(token, ip).getResults().first as ApiAuthenticationResult).successful
+        println("📊 [SQLAuthService] Database returned successful=$result for token='$token'")
+        cache[token] = result
+        return result
     }
 }

@@ -17,7 +17,7 @@ class UpdateHiscoreExpMode(private val userId: Int,
         val updateQuery = "UPDATE skill_hiscores set xp_mode = ? WHERE userid = ? AND mode = ? AND xp_mode = ?"
         
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(updateQuery).use {
                     it.setInt(1, changes.newMode.index)
                     it.setInt(2, userId)

@@ -21,7 +21,7 @@ class WorldEventsQuery(private val worldName: String): SQLRunnable() {
 
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(FETCH_QUERY).use { stmt ->
                     stmt.setString(1, worldName)
                     stmt.execute()

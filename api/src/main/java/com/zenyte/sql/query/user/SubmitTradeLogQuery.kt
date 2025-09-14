@@ -19,7 +19,7 @@ class SubmitTradeLogQuery(private val transaction: TradeLog) : SQLRunnable() {
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(insertQuery).use {
                     it.setString(1, transaction.user)
                     it.setString(2, transaction.userIp)

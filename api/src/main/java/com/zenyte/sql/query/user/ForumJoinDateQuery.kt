@@ -20,7 +20,7 @@ class ForumJoinDateQuery(private val user: String) : SQLRunnable() {
 
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_forum").use { con ->
+            HikariPool.getConnection(auth, "elder_forum").use { con ->
                 con.prepareStatement(query).use {
                     it.setString(1, user)
                     it.execute()

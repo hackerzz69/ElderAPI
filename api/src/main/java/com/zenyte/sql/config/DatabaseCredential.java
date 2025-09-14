@@ -4,7 +4,7 @@ public enum DatabaseCredential {
     
     LOCAL("localhost", "elderapi_user", "Password2013!@"),
     BETA_DOCKER("localhost", "elderapi_user", "Password2013!@"),
-    ;
+;
     
     private String host;
     private String user;

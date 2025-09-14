@@ -16,7 +16,7 @@ class UserByNameColumnsQuery(private val username: String, columns: Array<String
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_forum").use { con ->
+            HikariPool.getConnection(auth, "elder_forum").use { con ->
                 con.prepareStatement(query).use {
                     it.setString(1, username)
                     return Pair(UserColumnResults(it.executeQuery()), null)

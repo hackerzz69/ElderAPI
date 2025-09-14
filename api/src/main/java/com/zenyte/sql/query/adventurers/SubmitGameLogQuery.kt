@@ -22,7 +22,7 @@ class SubmitGameLogQuery(val request: SubmitGamelogRequest): SQLRunnable() {
 
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(if (!request.pvp) query else pvpQuery).use {
                     it.setString(1, request.user)
                     it.setString(2, request.icon)

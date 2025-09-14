@@ -17,7 +17,7 @@ class SubmitPunishmentLogQuery(private val punishment: PunishmentLog) : SQLRunna
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(insertQuery).use {
                     it.setString(1, punishment.modName)
                     it.setString(2, punishment.offender)

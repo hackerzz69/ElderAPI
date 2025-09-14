@@ -84,7 +84,7 @@ class RuneliteHiscoresQuery(private val username: String,
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 val responseBuilder = StringBuilder()
     
                 var offset = 0

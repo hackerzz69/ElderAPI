@@ -20,7 +20,7 @@ class SelectAdventurerLogQuery(private val username: String) : SQLRunnable() {
 
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         return try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(selectQuery).use { stmt ->
                     stmt.setString(1, username.replace(" ", "_"))
                     AdventurerLogQueryResults(stmt.executeQuery(), username) to null

@@ -32,7 +32,7 @@ class UpdateSingleHiscore(private val userId: Int,
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)", rowsToUpdate.size, 8)
         
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(deleteQuery).use {
                     it.setInt(1, userId)
                     it.setInt(2, gameMode)
