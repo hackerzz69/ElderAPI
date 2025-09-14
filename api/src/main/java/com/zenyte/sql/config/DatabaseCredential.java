@@ -2,8 +2,8 @@ package com.zenyte.sql.config;
 
 public enum DatabaseCredential {
     
-    LOCAL("localhost", "Elvarg", "xx01$xz$Elvarg!Discord"),
-    BETA_DOCKER("localhost", "Elvarg", "xx01$xz$Elvarg!Discord"),
+    LOCAL("localhost", "elder", "m@iGJiEyxEQ0]2TW"),
+    BETA_DOCKER("localhost", "elder", "m@iGJiEyxEQ0]2TW"),
     ;
     
     private String host;

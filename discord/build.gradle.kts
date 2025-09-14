@@ -2,9 +2,9 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm")
+    alias(libs.plugins.kotlin.jvm)
     application
-    id("com.gradleup.shadow")
+    alias(libs.plugins.shadow)
 }
 
 application {
@@ -13,23 +13,28 @@ application {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.java.get().toInt()))
     }
 }
 
 dependencies {
+    implementation(libs.gson)
+    implementation(libs.kotlin.logging)
     implementation("io.github.classgraph:classgraph:4.8.179")
     implementation("net.dv8tion:JDA:5.0.0-beta.24")
 }
 
-tasks.withType<ShadowJar> {
+tasks.named<ShadowJar>("shadowJar") {
     archiveBaseName.set("discord")
-    archiveVersion.set("")
-    archiveClassifier.set("")
+    archiveVersion.set("")     // omit version from filename
+    archiveClassifier.set("")  // no "-all" suffix
+    mergeServiceFiles()        // handle service loader files in META-INF
+    minimize()                 // shrink the jar by removing unused classes
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "21"
+        jvmTarget = libs.versions.java.get()
+        freeCompilerArgs = listOf("-Xjsr305=strict")
     }
 }

@@ -9,12 +9,12 @@ import okhttp3.Request
 class AntiknoxQuery {
 
     companion object {
-        private const val AUTH = "3b3ded7c82983e4fb66b1628434573dd83055c4f80acafd2fc088d3b3c2cabdb"
-        private val parser = JsonParser()
+        private const val AUTH =
+            "3b3ded7c82983e4fb66b1628434573dd83055c4f80acafd2fc088d3b3c2cabdb"
     }
 
     fun execute(ip: String): AntiknoxAPIResult {
-        require(http != null) { "[ANTIKNOX] The HTTP client cannot be null!" }
+        requireNotNull(http) { "[ANTIKNOX] The HTTP client cannot be null!" }
         require(ip.isNotBlank()) { "[ANTIKNOX] IP address cannot be empty!" }
 
         val url = HttpUrl.Builder()
@@ -34,35 +34,34 @@ class AntiknoxQuery {
             http!!.newCall(request).execute().use { response ->
                 val body = response.body ?: return AntiknoxAPIResult(false, "")
 
-                if (response.isSuccessful) {
-                    val json = body.string()
-                    if (json.isBlank()) {
-                        println("[ANTIKNOX] Empty JSON response")
-                        return AntiknoxAPIResult(false, "")
-                    }
-
-                    val element = JsonParser.parseString(json).asJsonObject
-
-                    val direct = element.getAsJsonObject("direct")
-                    if (direct != null) {
-                        val type = direct.get("type").asString
-                        return AntiknoxAPIResult(type != "tor" && type != "proxy", json)
-                    }
-
-                    val heuristics = element.getAsJsonObject("heuristics")
-                    if (heuristics != null) {
-                        val label = heuristics.get("label").asString
-                        return AntiknoxAPIResult(label != "hosting", json)
-                    }
-
-                    return AntiknoxAPIResult(false, json)
+                if (!response.isSuccessful) {
+                    println("[ANTIKNOX] Non-200 response: ${response.code}")
+                    return AntiknoxAPIResult(false, "")
                 }
 
-                AntiknoxAPIResult(false, "")
+                val json = body.string()
+                if (json.isBlank()) {
+                    println("[ANTIKNOX] Empty JSON response")
+                    return AntiknoxAPIResult(false, "")
+                }
+
+                val element: JsonObject = JsonParser.parseString(json).asJsonObject
+
+                element.getAsJsonObject("direct")?.let { direct ->
+                    val type = direct.get("type").asString
+                    return AntiknoxAPIResult(type != "tor" && type != "proxy", json)
+                }
+
+                element.getAsJsonObject("heuristics")?.let { heuristics ->
+                    val label = heuristics.get("label").asString
+                    return AntiknoxAPIResult(label != "hosting", json)
+                }
+
+                AntiknoxAPIResult(false, json)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
             println("[ANTIKNOX] Exception during query: ${e.message}")
+            e.printStackTrace()
             AntiknoxAPIResult(false, "")
         }
     }
