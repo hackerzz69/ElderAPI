@@ -19,9 +19,9 @@ import okhttp3.RequestBody.Companion.toRequestBody
 object Discord {
     
     private val logger = KotlinLogging.logger {}
-    private const val API_VERSION = 6 // discord api version https://discordapp.com/developers/docs/reference#api-versioning
-    private const val GUILD = 373833867934826496 // Zenyte guild
-    private const val TOKEN = "NDE3MjkxODQyNjc4MjkyNDgw.DXRPIQ.pcDAjV6s5aMyTz15YLpy74jHcnQ" // TODO convert to env var
+    private const val API_VERSION = 10 // discord api version https://discordapp.com/developers/docs/reference#api-versioning
+    private const val GUILD = 1351292737499955210 // Elder guild
+    private val TOKEN = System.getenv("BOT_TOKEN") ?: error("BOT_TOKEN not set")
     
     private val client = clientBuilder
             .addNetworkInterceptor { chain ->

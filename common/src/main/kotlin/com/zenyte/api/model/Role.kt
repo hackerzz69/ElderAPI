@@ -6,7 +6,7 @@ enum class IronmanMode(val id: Int) {
     ULTIMATE_IRONMAN(2),
     HARDCORE_IRONMAN(3),
     DEAD_HARDCORE_IRONMAN(4);
-    
+
     companion object {
         @JvmField
         val VALUES = values().asList()
@@ -17,7 +17,7 @@ enum class ExpMode(val index: Int) {
     FIFTY(0),
     TEN(1),
     FIVE(2);
-    
+
     companion object {
         @JvmField
         val VALUES = values().asList()
@@ -25,54 +25,59 @@ enum class ExpMode(val index: Int) {
 }
 
 enum class Role(val forumGroupId: Int = -1, val discordRoleId: Long = -1) {
-    
-    QUEEN(12, 374174447730556928),
-    ADMINISTRATOR(4, 374174266960379905),
-    DEVELOPER(11, 378218219326013443),
-    
-    REGISTERED_MEMBER(forumGroupId = 3),
-    
-    WEB_DEVELOPER(19, 573618268724658226),
-    FORUM_MODERATOR(7, 581282007389306880),
-    MODERATOR(6, 402904089886851082),
-    SENIOR_MODERATOR(20, 584558360955977779),
-    SUPPORT(8, 402904374873161730),
-    
-    STAFF(discordRoleId = 378650181165514752),
-    
-    YOUTUBER(18, 572801385155002386),
-    
-    SAPPHIRE_MEMBER(14, 582400825352257566),
-    EMERALD_MEMBER(15, 582401068592529448),
-    RUBY_MEMBER(16, 582401279285002240),
-    DIAMOND_MEMBER(17, 582401511548780564),
-    DRAGONSTONE_MEMBER(21, 583010349385777152),
-    ONYX_MEMBER(22, 583010520441815041),
-    ZENYTE_MEMBER(23, 583010557075128320),
-    
-    VERIFIED(discordRoleId = 582579215199895553),
-    BETA_CREW(discordRoleId = 426449738108370944),
-    BETA_MEDAL(discordRoleId = 449849891779379200),
-    
-    ZENYTE_BOT(discordRoleId = 503995939783180288),
-    
-    ;
-    
+
+    // ─── Core Staff ────────────────────────────────
+    OWNER(12, 1389074871467774055),
+    ADMIN(4, 1389075141798920203),
+    DEVELOPER(11, 1393627067332952135),
+    STAFF(discordRoleId = 1393627067332952135),
+    MODERATOR(6, 1416834078522474657),
+    SENIOR_MODERATOR(20, 1416834295124725791),
+    SUPPORT(8, 1416834532539236463),
+    FORUM_MODERATOR(7, 1416834827075850381),
+    WEB_DEVELOPER(19, 1416835086262861958),
+
+    // ─── Donator Tiers ─────────────────────────────
+    DONATOR_SAPPHIRE(14, 1416835376797978704),
+    DONATOR_EMERALD(15, 1416835869242818600),
+    DONATOR_RUBY(16, 1416835975241400370),
+    DONATOR_DIAMOND(17, 1416836115356319859),
+    DONATOR_DRAGONSTONE(21, 1416836310374809772),
+    DONATOR_ONYX(22, 1416836524011425822),
+    DONATOR_ZENYTE(23, 1416836749187088594),
+
+    // ─── Special Roles ─────────────────────────────
+    VERIFIED(discordRoleId = 1416837519294595174),
+    CONTENT_CREATOR(18, 1416837667584479383), // replaces YOUTUBER
+    BETA_TESTER(discordRoleId = 1416837833280192532), // replaces BETA_CREW
+    BETA_MEDAL(discordRoleId = 1416837925009887393),
+    BOT(discordRoleId = 1416837997243928727), // replaces ZENYTE_BOT
+
+    // ─── Default Registered Member ────────────────
+    REGISTERED_MEMBER(forumGroupId = 3);
+
     fun isDiscordRole() = discordRoleId != -1L
     fun isForumRole() = forumGroupId != -1
-    
+
     companion object {
         @JvmField
-        val VALUES = values().asList()
-        
+        val VALUES = Role.entries
+
         @JvmField
-        val FORUM_GROUPS = VALUES.filter { it.isForumRole() }.map { Pair(it.forumGroupId, it) }.toMap()
-        
+        val FORUM_GROUPS = VALUES.filter { it.isForumRole() }.associateBy { it.forumGroupId }
+
         @JvmField
-        val DISCORD_ROLES = VALUES.filter { it.isDiscordRole() }.map { Pair(it.discordRoleId, it) }.toMap()
-    
+        val DISCORD_ROLES = VALUES.filter { it.isDiscordRole() }.associateBy { it.discordRoleId }
+
         @JvmField
-        val DONATOR_ROLES = listOf(SAPPHIRE_MEMBER, EMERALD_MEMBER, RUBY_MEMBER, DIAMOND_MEMBER, DRAGONSTONE_MEMBER, ONYX_MEMBER, ZENYTE_MEMBER)
+        val DONATOR_ROLES = listOf(
+            DONATOR_SAPPHIRE,
+            DONATOR_EMERALD,
+            DONATOR_RUBY,
+            DONATOR_DIAMOND,
+            DONATOR_DRAGONSTONE,
+            DONATOR_ONYX,
+            DONATOR_ZENYTE
+        )
     }
-    
 }
