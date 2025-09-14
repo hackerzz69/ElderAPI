@@ -1,0 +1,64 @@
+variables:
+  DISCORD_REPOSITORY_URL: 553631077765.dkr.ecr.eu-west-1.amazonaws.com/discord-bot
+  API_REPOSITORY_URL: 553631077765.dkr.ecr.eu-west-1.amazonaws.com/api-server
+  NGINX_REPOSITORY_URL: 553631077765.dkr.ecr.eu-west-1.amazonaws.com/nginx
+
+services:
+  - docker:dind
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle # set gradle location
+
+cache:
+  paths:
+    - .gradle/caches # cache gradle dependencies
+
+stages:
+  - compile
+  - build
+
+compile:
+  stage: compile
+  image: gradle:6.1.1-jdk8
+  script:
+    - gradle build --no-daemon
+  artifacts:
+    paths:
+      - "*/build/libs/*.jar" # pass built jars to other stages
+    expire_in: 1 week
+  only:
+    - master
+  tags:
+    - docker
+
+.docker:
+  image: docker:19.03.8
+  stage: build
+  dependencies:
+    - compile
+  before_script:
+    - apk add --no-cache curl jq python py-pip
+    - pip install awscli
+    - $(aws ecr get-login --no-include-email --region eu-west-1)
+  only:
+    - master
+  tags:
+    - docker
+
+discord:
+  extends: .docker
+  script:
+    - docker build -t $DISCORD_REPOSITORY_URL:latest . -f discord/Dockerfile
+    - docker push $DISCORD_REPOSITORY_URL
+
+api:
+  extends: .docker
+  script:
+    - docker build -t $API_REPOSITORY_URL:latest . -f api/Dockerfile
+    - docker push $API_REPOSITORY_URL
+
+nginx:
+  extends: .docker
+  script:
+    - docker build -t $NGINX_REPOSITORY_URL:latest . -f nginx/Dockerfile
+    - docker push $NGINX_REPOSITORY_URL
