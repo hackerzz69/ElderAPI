@@ -50,7 +50,7 @@ class HiscoresByColumnQuery(
 
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         return try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 val offset = MutableInt(0)
                 var queryBuilder = query
 

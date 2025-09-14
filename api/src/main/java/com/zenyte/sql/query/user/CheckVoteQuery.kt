@@ -20,7 +20,7 @@ class CheckVoteQuery(val displayName: String) : SQLRunnable() {
 
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(QUERY).use { stmt ->
                     stmt.setString(1, displayName)
                     stmt.execute()

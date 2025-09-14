@@ -35,7 +35,7 @@ class ClaimBondQuery(private val request: ClaimBondRequest) : SQLRunnable() {
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         return try {
             logger.info { "Redeeming bond: $request" }
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 val token = request.token
 
                 // If token is provided, enforce uniqueness

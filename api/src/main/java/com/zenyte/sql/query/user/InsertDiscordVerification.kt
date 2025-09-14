@@ -12,7 +12,7 @@ class InsertDiscordVerification(private val discordId: Long, private val memberI
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(insertQuery).use { pst ->
                     pst.setLong(1, discordId)
                     pst.setInt(2, memberId)

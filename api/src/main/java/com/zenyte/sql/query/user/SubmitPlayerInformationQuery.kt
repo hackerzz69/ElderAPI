@@ -26,7 +26,7 @@ class SubmitPlayerInformationQuery(private val info: PlayerInformation) : SQLRun
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(insertQuery).use {
                     // insert
                     it.setInt(1, info.userId)

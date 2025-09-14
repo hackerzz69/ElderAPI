@@ -21,7 +21,7 @@ class UpdateLastActiveDateQuery(private val userId: Int, private val timestamp: 
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_forum").use { con ->
+            HikariPool.getConnection(auth, "elder_forum").use { con ->
                 con.prepareStatement(updateQuery).use {
                     it.setInt(1, TimeUnit.MILLISECONDS.toSeconds(timestamp).toInt())
                     it.setInt(2, userId)

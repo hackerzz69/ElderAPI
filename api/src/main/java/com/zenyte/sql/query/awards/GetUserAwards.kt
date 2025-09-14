@@ -69,7 +69,7 @@ UNION
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_forum").use { con ->
+            HikariPool.getConnection(auth, "elder_forum").use { con ->
                 con.prepareStatement(selectQuery).use {
                     it.setString(1, username)
                     it.setString(2, username)

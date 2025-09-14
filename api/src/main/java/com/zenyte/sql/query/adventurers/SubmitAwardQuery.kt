@@ -30,7 +30,7 @@ class SubmitAwardQuery(val request: SubmitAwardRequest): SQLRunnable() {
 
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_forum").use { con ->
+            HikariPool.getConnection(auth, "elder_forum").use { con ->
                 con.prepareStatement(query).use { stmt ->
                     stmt.setInt(1, request.userId)
                     stmt.setInt(2, request.award)

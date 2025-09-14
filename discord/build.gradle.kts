@@ -21,7 +21,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.kotlin.logging)
     implementation("io.github.classgraph:classgraph:4.8.179")
-    implementation("net.dv8tion:JDA:5.0.0-beta.24")
+    implementation("net.dv8tion:JDA:5.6.1")
 }
 
 tasks.named<ShadowJar>("shadowJar") {

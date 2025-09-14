@@ -20,7 +20,7 @@ class AuthSecretTokenQuery(private val memberId: Int) : SQLRunnable() {
     
     override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_forum").use { con ->
+            HikariPool.getConnection(auth, "elder_forum").use { con ->
                 con.prepareStatement(query).use {
                     it.setInt(1, memberId)
                     return Pair(AuthTokenResult(it.executeQuery()), null)

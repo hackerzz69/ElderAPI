@@ -17,7 +17,7 @@ class UpdateUserMemberGroupsQuery(private val userId: Int,
         val updateQuery = "UPDATE core_members SET member_group_id = ?, mgroup_others = ? WHERE member_id = ?"
         
         try {
-            HikariPool.getConnection(auth, "zenyte_forum").use { con ->
+            HikariPool.getConnection(auth, "elder_forum").use { con ->
                 con.prepareStatement(updateQuery).use {
                     it.setString(1, primaryGroupId)
                     it.setString(2, secondaryMemberGroups)

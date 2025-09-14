@@ -20,7 +20,7 @@ class SelectPlayerInformationQuery(private val username: String) : SQLRunnable()
     
     override fun execute(auth: DatabaseCredential): Pair<SelectPlayerInformationResult, Exception?> {
         try {
-            HikariPool.getConnection(auth, "zenyte_main").use { con ->
+            HikariPool.getConnection(auth, "elder_main").use { con ->
                 con.prepareStatement(selectQuery).use {
                     it.setString(1, username)
                     return Pair(SelectPlayerInformationResult(it.executeQuery()), null)

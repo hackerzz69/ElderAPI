@@ -23,7 +23,7 @@ class RegisterUserQuery(val request: RegisterRequest) : SQLRunnable() {
 	override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
         try {
 	
-	        HikariPool.getConnection(auth, "zenyte_forum").use { con ->
+	        HikariPool.getConnection(auth, "elder_forum").use { con ->
                 con.prepareStatement(CHECK_QUERY).use { chk ->
                     chk.setString(1, request.username)
                     chk.execute()

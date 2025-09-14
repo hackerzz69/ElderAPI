@@ -20,7 +20,7 @@ class ApiAuthenticationQuery(private val token: String, private val ip: String) 
 	
 	override fun execute(auth: DatabaseCredential): Pair<SQLResults, Exception?> {
 		try {
-			HikariPool.getConnection(auth, "zenyte_main").use { con ->
+			HikariPool.getConnection(auth, "elder_main").use { con ->
 				con.prepareStatement(query).use {
 					it.setString(1, token)
 //					it.setString(2, ip)
