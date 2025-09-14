@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.hooks.EventListener
+import net.dv8tion.jda.api.requests.GatewayIntent
 import java.net.ConnectException
 import java.util.concurrent.TimeUnit
 import javax.security.auth.login.LoginException
@@ -114,6 +115,11 @@ object DiscordBot {
         try {
             val token = DISCORD_BOT_ENV_VAR.value
             val builder = JDABuilder.createDefault(token)
+                .enableIntents(
+                    GatewayIntent.GUILD_MESSAGES,
+                    GatewayIntent.MESSAGE_CONTENT,  // 👈 Needed for reading commands
+                    GatewayIntent.GUILD_MEMBERS     // 👈 Needed if you use roles/member checks
+                )
                 .addEventListeners(*loadListeners().toTypedArray())
 
             jda = builder.build().awaitReady()
@@ -127,6 +133,7 @@ object DiscordBot {
             exitProcess(2)
         }
     }
+
 
     private fun postLogin() {
         reloadCommands()
