@@ -1,27 +1,31 @@
+@file:JvmName("DiscordExtensions")
+
 package com.zenyte.discord
 
 import com.zenyte.api.model.Role
 import com.zenyte.discord.listeners.CommandListener
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Message
-
+import net.dv8tion.jda.api.entities.Role as JDARole
 
 /**
- * @author Corey
- * @since 08/10/2019
+ * Discord utility extensions for roles, members, and command parsing.
  */
 
-fun Long.getRoleById() = DiscordBot.getZenyteGuild().getRoleById(this)
+// Look up a Discord Role object by its ID on the configured guild
+fun Long.getRoleById(): JDARole? =
+    DiscordBot.getZenyteGuild().getRoleById(this)
 
-fun Role.asJDARole(): net.dv8tion.jda.api.entities.Role? {
-    if (!this.isDiscordRole()) {
-        return null
-    }
-    return this.discordRoleId.getRoleById()
-}
+// Convert our internal Role to a JDA Role if mapped
+fun Role.asJDARole(): JDARole? =
+    if (this.isDiscordRole()) this.discordRoleId.getRoleById() else null
 
-fun Message.getCommandArgs(identifier: String) = this.contentRaw.substring(identifier.length + CommandListener.COMMAND_PREFIX.length).trim()
+// Extract arguments from a message after a command identifier
+fun Message.getCommandArgs(identifier: String): String =
+    this.contentDisplay
+        .removePrefix(CommandListener.COMMAND_PREFIX + identifier)
+        .trim()
 
-fun Member.isStaff(): Boolean {
-    return this.roles.contains(Role.STAFF.asJDARole())
-}
+// Check whether a member is staff
+fun Member.isStaff(): Boolean =
+    Role.STAFF.asJDARole()?.let { it in this.roles } ?: false

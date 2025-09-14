@@ -5,57 +5,49 @@ import java.util.concurrent.Future
 /**
  * A [Runnable] subtype intended to run for a fixed iteration period
  * in the context of a [java.util.concurrent.ScheduledExecutorService].
+ *
+ * Iteratively calls [repeat] until it returns false, then self-cancels.
+ *
  * @author David O'Neill
  */
 abstract class FixedLengthRunnable : Runnable {
-    
+
     private var future: Future<*>? = null
-    
-    /**
-     * Iteratively runs `repeat()` until
-     * it returns `false`, at which point
-     * this runnable is cancelled from the executor.
-     */
+
     override fun run() {
-        if (!repeat()) cancel()
+        try {
+            if (!repeat()) cancel()
+        } catch (e: Exception) {
+            // If repeat() throws, fail fast and cancel the task
+            cancel()
+            throw e
+        }
     }
-    
+
     /**
-     * Defines the intended logic to be repeated, and
-     * should return `false` when the runnable
-     * should be cancelled and dequeued.
-     * @return whether or not to run another iteration
+     * Defines the logic to repeat. Return `false` when the task
+     * should stop running.
      */
-    abstract fun repeat(): Boolean
-    
-    /**
-     * Assign this runnables [Future] reference.
-     * @param future - the future associated with this runnable
-     */
+    protected abstract fun repeat(): Boolean
+
+    /** Assign this runnable's [Future]. Called by [CoresManager]. */
     internal fun assignFuture(future: Future<*>) {
         this.future = future
     }
-    
-    /**
-     * Unschedule the runnable, and ask the [SlowThreadPoolExecutor]
-     * to purge the cancelled task from the pool's queue.
-     */
+
+    /** Cancel this runnable without interrupting. */
     private fun cancel() {
-        future!!.cancel(false)
+        future?.cancel(false)
         CoresManager.purgeSlowExecutor()
     }
-    
+
     /**
+     * Cancel this runnable, with optional interruption of current execution.
      *
-     * Unschedule the runnable, and ask the [SlowThreadPoolExecutor]
-     * to purge the cancelled task from the pool's queue.
-     *
-     * @param interrupt boolean indicating whether or not current execution
-     * state should be killed regardless of whether or
-     * not it has finished
+     * @param interrupt whether to stop execution immediately
      */
     fun stopNow(interrupt: Boolean) {
-        future!!.cancel(interrupt)
+        future?.cancel(interrupt)
         CoresManager.purgeSlowExecutor()
     }
 }

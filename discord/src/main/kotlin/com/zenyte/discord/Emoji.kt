@@ -1,11 +1,9 @@
 package com.zenyte.discord
 
 /**
- * @author Corey
- * @since 09/03/2020
+ * OSRS-related Discord custom emojis (raw strings).
  */
 object Emoji {
-    
     const val AGILITY = "<:agility:686673869343293451>"
     const val ATTACK = "<:attack:686673866558406738>"
     const val COMBAT = "<:combat:686673866201890938>"
@@ -31,9 +29,8 @@ object Emoji {
     const val STRENGTH = "<:strength:686673866579640320>"
     const val THIEVING = "<:thieving:686673866486972479>"
     const val WOODCUTTING = "<:woodcutting:686673866512531521>"
-    
+
     const val IRONMAN = "<:ironman:633279727641165825>"
     const val ULTIMATE_IRONMAN = "<:ultimate_ironman:633279727938961408>"
     const val HARDCORE_IRONMAN = "<:hardcore_ironman:633279727938830356>"
-    
 }

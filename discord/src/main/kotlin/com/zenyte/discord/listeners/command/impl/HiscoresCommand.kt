@@ -7,7 +7,7 @@ import com.zenyte.api.model.SkillHiscore
 import com.zenyte.common.calculateCombatLevel
 import com.zenyte.common.capitalizeWords
 import com.zenyte.common.getJsonResponseOrNull
-import com.zenyte.common.gson
+import com.zenyte.common.CommonConfig.gson
 import com.zenyte.discord.Api
 import com.zenyte.discord.Emoji
 import com.zenyte.discord.getCommandArgs
@@ -57,7 +57,7 @@ class HiscoresCommand : Command {
         val formattedUsername = firstEntry.username.replace("_", " ").capitalizeWords()
         
         val embed = EmbedBuilder()
-                .setColor(15837287)
+                .setColor(0xF1A2A7)
                 .setTimestamp(Instant.now())
                 .setFooter("Zenyte Hiscores", "https://zenyte.com/img/ic_launcher.png")
                 .setAuthor(formattedUsername, "https://zenyte.com/hiscores/search/${username.replace(" ", "_")}")
@@ -140,13 +140,14 @@ class HiscoresCommand : Command {
         }
         """.trimIndent(), true)
         
-        message.channel.sendMessage(embed.build()).queue()
+        message.channel.sendMessageEmbeds(embed.build()).queue()
         
     }
     
     private fun getEntries(username: String): Map<Int, SkillHiscore> {
         val request = Request.Builder()
                 .url(Api.getApiRoot()
+                        .newBuilder()
                         .addPathSegment("hiscores")
                         .addPathSegment("user")
                         .addPathSegment(username.replace(" ", "_"))
@@ -161,8 +162,8 @@ class HiscoresCommand : Command {
         }
         
         val entryArray = gson.fromJson(response, Array<SkillHiscore>::class.java)
-        
-        return entryArray.map { it.skillId to it }.toMap()
+
+        return entryArray.associateBy { it.skillId }
     }
     
 }

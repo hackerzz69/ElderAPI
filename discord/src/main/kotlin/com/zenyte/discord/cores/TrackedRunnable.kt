@@ -1,23 +1,26 @@
 package com.zenyte.discord.cores
 
-import java.util.*
-import java.util.concurrent.Future
+import java.util.UUID
 
 /**
  * A [Runnable] subtype intended to run for a dynamic iteration period
  * in the context of a [java.util.concurrent.ScheduledExecutorService].
+ *
+ * Each runnable is assigned a unique [trackingKey] so it can be
+ * managed (e.g. cancelled) via [CoresManager.ServiceProvider].
+ *
  * @author David O'Neill
  */
 abstract class TrackedRunnable : Runnable {
-    
+
     /**
-     * Returns this runnables tracing key. This key
-     * should be supplied to the [com.rs.cores.CoresManager.ServiceProvider]
-     * to cancel the [Future] associated with this runnable.
-     * @return the tracking key for this runnable
+     * Unique tracking key for this runnable.
+     * Used by [CoresManager.ServiceProvider] to identify and cancel tasks.
      */
-    val trackingKey = UUID.randomUUID().toString()
-    
+    val trackingKey: String = UUID.randomUUID().toString()
+
+    /**
+     * Defines the intended logic for this task.
+     */
     abstract override fun run()
-    
 }

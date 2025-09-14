@@ -17,6 +17,10 @@ gson = "2.11.0"
 lettuce = "6.8.1.RELEASE"
 kotlin-logging = "3.0.5"
 commons-lang3 = "3.14.0"
+logback = "1.5.18"
+jda      = "5.6.1"
+classgraph = "4.8.181"
+coroutines = "1.9.0"
 
 [libraries]
 mysql = { module = "com.mysql:mysql-connector-j", version.ref = "mysql" }
@@ -32,6 +36,10 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 lettuce = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
 kotlin-logging = { module = "io.github.microutils:kotlin-logging", version.ref = "kotlin-logging" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+jda                 = { module = "net.dv8tion:JDA",                 version.ref = "jda" }
+classgraph          = { module = "io.github.classgraph:classgraph", version.ref = "classgraph" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }

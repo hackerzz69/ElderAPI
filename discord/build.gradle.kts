@@ -8,7 +8,8 @@ plugins {
 }
 
 application {
-    mainClass.set("com.zenyte.discord.MainKt")
+    // make sure this matches your entrypoint object (BootKt or MainKt)
+    mainClass.set("com.zenyte.discord.BootKt")
 }
 
 java {
@@ -18,18 +19,32 @@ java {
 }
 
 dependencies {
+    // JSON + utils
     implementation(libs.gson)
     implementation(libs.kotlin.logging)
-    implementation("io.github.classgraph:classgraph:4.8.179")
-    implementation("net.dv8tion:JDA:5.6.1")
+    implementation(libs.classgraph)
+    implementation(libs.kotlinx.coroutines.core)
+
+    // Discord
+    implementation(libs.jda)
+
+    // Logging backend
+    implementation(libs.logback.classic)
+
+    // HTTP / API client
+    implementation(libs.okhttp)
+    implementation(libs.jackson.kotlin)
+
+    // Unit tests
+    testImplementation(kotlin("test"))
 }
 
 tasks.named<ShadowJar>("shadowJar") {
     archiveBaseName.set("discord")
     archiveVersion.set("")     // omit version from filename
     archiveClassifier.set("")  // no "-all" suffix
-    mergeServiceFiles()        // handle service loader files in META-INF
-    minimize()                 // shrink the jar by removing unused classes
+    mergeServiceFiles()
+    minimize()
 }
 
 tasks.withType<KotlinCompile> {

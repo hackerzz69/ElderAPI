@@ -13,39 +13,43 @@ import java.util.concurrent.TimeUnit
  * @since 08/10/2019
  */
 class TicketCommand : Command {
-    
+
     private val adminIdentifiers = setOf("adminticket", "adminhelp")
-    
+
     override val identifiers = arrayOf("ticket", *adminIdentifiers.toTypedArray())
-    
-    override val description = "Create a support request - prepend with 'admin' to request an admin"
-    
+
+    override val description =
+        "Create a support request — prepend with 'admin' to request an admin"
+
     override fun execute(message: Message, identifier: String) {
         val member = message.member ?: return
-        val query = message.contentDisplay.substring(identifier.length + CommandListener.COMMAND_PREFIX.length).trim()
-        
+        val channel = message.channel.asTextChannel()
+        val query = message.contentDisplay
+            .substring(identifier.length + CommandListener.COMMAND_PREFIX.length)
+            .trim()
+
         if (query.isEmpty()) {
             message.delete().queue()
-            message.textChannel.sendMessage("${message.member!!.asMention} You need to specify a question/query; use `::$identifier your query here`.").queue {
+            channel.sendMessage("${member.asMention} You need to specify a question/query; use `::$identifier your query here`.").queue {
                 it.delete().queueAfter(10, TimeUnit.SECONDS)
             }
             return
         }
-        
+
         message.delete().queue {
             TicketManager.create(
-                    Ticket(
-                            adminRequested = adminIdentifiers.contains(identifier.toLowerCase()),
-                            creatorUserId = member.idLong,
-                            query = query
-                    )
+                Ticket(
+                    adminRequested = adminIdentifiers.contains(identifier.lowercase()),
+                    creatorUserId = member.idLong,
+                    query = query
+                )
             )
         }
     }
-    
+
     override fun canExecute(message: Message): Boolean {
         val member = message.member ?: return false
-        return !member.roles.contains(TicketManager.TICKET_BAN_ROLE_ID.getRoleById())
+        val bannedRole = TicketManager.TICKET_BAN_ROLE_ID.getRoleById()
+        return !member.roles.contains(bannedRole)
     }
-    
 }

@@ -3,11 +3,14 @@ package com.zenyte.discord
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.zenyte.api.model.Role
+import BotConfig
 import com.zenyte.common.EnvironmentVariable
 import com.zenyte.discord.cores.CoresManager
 import com.zenyte.discord.listeners.CommandListener
 import com.zenyte.discord.listeners.command.Command
 import io.github.classgraph.ClassGraph
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
@@ -16,202 +19,187 @@ import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.hooks.EventListener
 import java.net.ConnectException
-import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.security.auth.login.LoginException
 import kotlin.system.exitProcess
+import kotlin.reflect.full.createInstance
 
 /**
- * @author Corey
- * @since 06/10/2018
+ * Main Discord bot singleton.
  */
 object DiscordBot {
-    
+
     val gson: Gson = GsonBuilder().disableHtmlEscaping().create()
-    
+
     private const val API_PING_TIMEOUT = 15_000
     private const val API_PING_AMOUNT = 10
     private const val ZENYTE_GUILD = "373833867934826496"
     private val DISCORD_BOT_ENV_VAR = EnvironmentVariable("BOT_TOKEN")
-    
+
     private val logger = KotlinLogging.logger {}
-    private val commands = ArrayList<Command>()
-    
+    private val commands = mutableListOf<Command>()
+
     lateinit var jda: JDA
-    
-    var greetNewMembers = true
-    
+        private set
+
+    var greetNewMembers: Boolean = true
+
     fun init() {
         if (Api.DEVELOPER_MODE) {
-            logger.info { "Developer mode enabled" }
+            logger.info { "Developer mode enabled — disabling member greets" }
             greetNewMembers = false
         }
-    
+
         preLogin()
         login()
         postLogin()
     }
-    
+
     private fun preLogin() {
         checkEnvironmentVariables()
-        ping()
+        pingApi()
     }
-    
-    private fun ping() {
+
+    private fun pingApi() {
         if (Api.DEVELOPER_MODE) {
-            logger.info { "Dev mode enabled, skipping api ping" }
+            logger.info { "Dev mode enabled, skipping API ping" }
             return
         }
-    
+
         var success = false
-    
         for (i in 1..API_PING_AMOUNT) {
-            val apiUrl = Api.getApiRoot()
-                .addPathSegment("ping")
-                .build()
-
-            // Log the URL
-            logger.info ("Request URL: $apiUrl")
-
-            logger.info { "Pinging api service; attempt $i" }
-
+            logger.info { "Pinging API service (attempt $i/$API_PING_AMOUNT)" }
             val ping = try {
                 Api.ping()
             } catch (e: ConnectException) {
-                logger.warn { "Failed to ping, reason: ${e.cause} / ${e.message}" }
+                logger.warn { "Ping failed: ${e.message}" }
                 false
             }
-            
-            if (!ping) {
-                logger.warn { "Ping failed - retrying in ${TimeUnit.MILLISECONDS.toSeconds(API_PING_TIMEOUT.toLong())}s" }
-                Thread.sleep(API_PING_TIMEOUT.toLong())
-            } else {
-                logger.info { "Received ping response from api server." }
+
+            if (ping) {
+                logger.info { "API responded successfully." }
                 success = true
                 break
+            } else {
+                val waitSeconds = TimeUnit.MILLISECONDS.toSeconds(API_PING_TIMEOUT.toLong())
+                logger.warn { "Ping failed — retrying in ${waitSeconds}s" }
+                runBlocking { delay(API_PING_TIMEOUT.toLong()) }
             }
         }
-        
+
         if (!success) {
-            logger.error { "Failed to ping api after $API_PING_AMOUNT attempts" }
+            logger.error { "Failed to reach API after $API_PING_AMOUNT attempts" }
             exitProcess(2)
         }
-        
     }
-    
+
     private fun checkEnvironmentVariables() {
         val environmentVariables = listOf(
-                if (!Api.DEVELOPER_MODE) Api.API_TOKEN_ENV_VAR else null,
-                if (!Api.DEVELOPER_MODE) Api.API_URL_ENV_VAR else null,
-                DISCORD_BOT_ENV_VAR
+            if (!Api.DEVELOPER_MODE) Api.API_TOKEN_ENV_VAR else null,
+            if (!Api.DEVELOPER_MODE) Api.API_URL_ENV_VAR else null,
+            DISCORD_BOT_ENV_VAR
         )
-    
+
         environmentVariables.filterNotNull().forEach {
             if (it.value.isNullOrBlank()) {
-                logger.error { "Environment variable '$it' invalid!" }
+                logger.error { "Environment variable '${it.key}' is missing/invalid" }
                 exitProcess(2)
             } else {
-                logger.debug { "Environment variable $it has valid value" }
+                logger.debug { "Environment variable ${it.key} has a valid value" }
             }
         }
     }
-    
+
     private fun login() {
         try {
-            val builder = JDABuilder(DISCORD_BOT_ENV_VAR.value)
-                    .addEventListeners(*loadListeners().toTypedArray())
-            jda = builder.build()
-            jda.awaitReady() // block until connection has been made
+            val token = DISCORD_BOT_ENV_VAR.value
+            val builder = JDABuilder.createDefault(token)
+                .addEventListeners(*loadListeners().toTypedArray())
+
+            jda = builder.build().awaitReady()
+            logger.info { "Discord connection established" }
         } catch (e: LoginException) {
-            logger.error(e) { "Failed to login" }
+            logger.error(e) { "Failed to login to Discord" }
             exitProcess(2)
         } catch (e: InterruptedException) {
-            e.printStackTrace()
+            Thread.currentThread().interrupt()
+            logger.error(e) { "Discord login interrupted" }
+            exitProcess(2)
         }
     }
-    
+
     private fun postLogin() {
         reloadCommands()
         CoresManager.init()
-        scheduleTasks()
+        scheduleTasks(BotConfig.default(), this)
     }
-    
-    fun getZenyteGuild(): Guild = jda.getGuildById(ZENYTE_GUILD)!!
-    
+
+    fun getZenyteGuild(): Guild =
+        jda.getGuildById(ZENYTE_GUILD) ?: error("Guild $ZENYTE_GUILD not found!")
+
     fun userIsVerified(member: Member): Boolean {
         val verifiedRole = getZenyteGuild().getRoleById(Role.VERIFIED.discordRoleId)
-        return member.roles.contains(verifiedRole)
+        return verifiedRole != null && verifiedRole in member.roles
     }
-    
+
     fun setPresence(str: String) {
         jda.presence.activity = Activity.playing(str)
     }
-    
+
     private fun loadListeners(): List<EventListener> {
-        val listeners = loadClassesImplementing<EventListener>(false, "com.zenyte.discord.listeners")
-        logger.info { "Loaded ${listeners.size} listeners:" }
-        listeners.forEach {
-            logger.info { it::class.java.simpleName }
-        }
+        val listeners = loadClassesImplementing<EventListener>(
+            recursive = false,
+            "com.zenyte.discord.listeners"
+        )
+        logger.info { "Loaded ${listeners.size} listeners: ${listeners.joinToString { it::class.java.simpleName }}" }
         return listeners
     }
-    
-    /**
-     * @return A copy of the commands list.
-     */
-    fun getCommands(): List<Command> {
-        return ArrayList(commands)
-    }
-    
+
+    fun getCommands(): List<Command> = commands.toList()
+
     private fun reloadCommands() {
         commands.clear()
         commands.addAll(loadCommands())
     }
-    
+
     private fun loadCommands(): List<Command> {
-        val commands = loadClassesImplementing<Command>(true, "com.zenyte.discord.listeners.command.impl")
-        logger.info { "Loaded ${commands.size} commands:" }
-        commands.forEach {
-            logger.info {
-                "${CommandListener.COMMAND_PREFIX}${it.identifiers.joinToString("|")} (${it::class.java.simpleName})"
-            }
+        val commands = loadClassesImplementing<Command>(
+            recursive = true,
+            "com.zenyte.discord.listeners.command.impl"
+        )
+        logger.info {
+            "Loaded ${commands.size} commands: ${
+                commands.joinToString { "${CommandListener.COMMAND_PREFIX}${it.identifiers.joinToString("|")}" }
+            }"
         }
         return commands
     }
-    
-    /**
-     * Returns loaded instances of all classes found implementing the provided class in the provided packages.
-     *
-     * @param recursive Whether or not it should recurse through packages.
-     * @param dirs      The packages to look in.
-     * @param <T>       The type we want to look for and return.
-     * @return An [ArrayList] of instantiated objects.
-     */
-    private inline fun <reified T : Any> loadClassesImplementing(recursive: Boolean, vararg dirs: String): List<T> {
-        val classes = ArrayList<T>()
+
+    private inline fun <reified T : Any> loadClassesImplementing(
+        recursive: Boolean,
+        vararg dirs: String
+    ): List<T> {
         val clazz = T::class.java
-    
+        val instances = mutableListOf<T>()
+
         ClassGraph().enableAllInfo().apply {
             if (recursive) {
-                whitelistPackages(*dirs)
+                acceptPackages(*dirs)
             } else {
-                whitelistPackagesNonRecursive(*dirs)
+                acceptPackagesNonRecursive(*dirs)
             }
-        
-            scan().use { classesScanned ->
-                for (classInfo in classesScanned.getClassesImplementing(clazz.canonicalName)) {
+            scan().use { scanResult ->
+                for (classInfo in scanResult.getClassesImplementing(clazz.canonicalName)) {
                     try {
-                        classes.add(clazz.cast(classInfo.loadClass().newInstance()))
-                    } catch (e: InstantiationException) {
-                        logger.error(e) { "Failed to load ${classInfo.simpleName}" }
-                    } catch (e: IllegalAccessException) {
+                        val loadedClass = classInfo.loadClass()
+                        val instance = loadedClass.kotlin.createInstance()
+                        instances.add(clazz.cast(instance))
+                    } catch (e: Exception) {
                         logger.error(e) { "Failed to load ${classInfo.simpleName}" }
                     }
                 }
             }
         }
-    
-        return classes
+        return instances
     }
-    
 }
